@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Lists</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            background-color: #007BFF;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .user-table {
+            margin: 20px auto;
+            width: 80%;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-collapse: collapse;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-table th, .user-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .user-table th {
+            background-color: #f2f2f2;
+        }
+
+        .actions {
+            text-align: center;
+        }
+
+        .edit-button, .delete-button {
+            cursor: pointer;
+            color: #007BFF;
+        }
+    </style>
+</head>
+<body>
+    <h1>User Lists</h1>
+ <div style="text-align: center;">
+    <!-- Add a "Create" button that links to the /create endpoint -->
+    <a href="/create"><button style="background-color: #007BFF; color: white;">Create</button></a>
+</div>
+
+
+    <table class="user-table">
+        <thead>
+            <tr>
+                <th>uuid</th>
+                <th>first_name</th>
+                <th>last_name</th>
+                <th>street</th>
+                <th>address</th>
+                <th>city</th>
+                <th>state</th>
+                <th>email</th>
+                <th>phone</th>
+                <th>Edit</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody id="userList">
+            <!-- User data rows will be displayed here -->
+        </tbody>
+    </table>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Use jQuery to make an AJAX request to your API endpoint
+        $(document).ready(function () {
+            $.ajax({
+                url: '/userLists', // Replace with your API endpoint URL
+                method: 'GET',
+                success: function (data) {
+                    // Handle the API response data and display it on the HTML page
+                    displayUserList(data);
+                },
+                error: function (error) {
+                    console.error('API request failed:', error);
+                }
+            });
+        });
+
+        // Function to display user list data on the page
+        function displayUserList(data) {
+            // Parse the JSON response data
+            var userList = JSON.parse(data);
+
+            userList.forEach(function (user) {
+                var rowHtml = '<tr>';
+                rowHtml += '<td>' + user.uuid + '</td>';
+                rowHtml += '<td>' + user.first_name + '</td>';
+                rowHtml += '<td>' + user.last_name + '</td>';
+                rowHtml += '<td>' + user.street + '</td>';
+                rowHtml += '<td>' + user.address + '</td>';
+                rowHtml += '<td>' + user.city + '</td>';
+                rowHtml += '<td>' + user.state + '</td>';
+                rowHtml += '<td>' + user.email + '</td>';
+                rowHtml += '<td>' + user.phone + '</td>';
+                rowHtml += '<td class="actions">';
+                rowHtml += '<span class="edit-button" onclick="editUser(\'' + user.uuid + '\')">Edit</span>';
+                rowHtml += '</td>';
+                rowHtml += '<td class="actions">';
+                rowHtml += '<span class="delete-button" onclick="deleteUser(\'' + user.uuid + '\')">Delete</span>';
+                rowHtml += '</td>';
+                rowHtml += '</tr>';
+
+                // Append the user's data row to the table body
+                $('#userList').append(rowHtml);
+            });
+        }
+
+        // Function to handle the delete action
+        function deleteUser(uuid) {
+            // Make an AJAX request to the /delUser endpoint with the UUID
+            $.ajax({
+                url: '/delUser?uuid=' + uuid, // Replace with your delete endpoint URL
+                method: 'POST',
+                success: function () {
+                    // Handle success (e.g., remove the row from the table)
+                    $('#' + uuid).remove();
+                    // Refresh the page
+                    location.reload();
+                },
+                error: function (error) {
+                    console.error('Delete request failed:', error);
+                }
+            });
+        }
+
+        // Function to handle the edit action
+        function editUser(uuid) {
+            // Redirect to the edit endpoint with the UUID
+            window.location.href = '/edit?uuid=' + uuid; // Replace with your edit endpoint URL
+        }
+    </script>
+</body>
+</html>
